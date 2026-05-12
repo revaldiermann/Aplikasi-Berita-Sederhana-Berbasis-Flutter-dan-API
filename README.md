@@ -1,95 +1,103 @@
-# Aplikasi Berita dengan CodeIgniter 4 dan Flutter
+📱 Flutter News CMS (API + Flutter + CodeIgniter 4)
+📌 Deskripsi Project
 
-Aplikasi berita sederhana dengan backend CodeIgniter 4 dan frontend Flutter.
+Flutter News CMS adalah aplikasi manajemen berita sederhana berbasis Flutter (frontend mobile/web) yang terhubung dengan REST API menggunakan CodeIgniter 4 (backend).
 
-## Struktur Proyek
+Aplikasi ini memungkinkan pengguna untuk melakukan operasi CRUD (Create, Read, Update, Delete) berita serta upload gambar.
 
-- Backend: CodeIgniter 4
-- Frontend: Flutter
-- Database: MySQL
+Project ini dibuat sebagai latihan integrasi Flutter + API + Database MySQL.
 
-## Menjalankan Aplikasi
+⚙️ Fitur Utama
+📄 Menampilkan daftar berita dari API
+🔍 Detail berita
+➕ Tambah berita baru
+✏️ Edit berita
+❌ Hapus berita
+🖼️ Upload gambar berita
+🌐 Integrasi REST API (CodeIgniter 4)
+📱 Support Flutter Android & Web
+🧱 Tech Stack
+Frontend
+Flutter
+Provider (State Management)
+HTTP Package
+Image Picker
+Backend
+CodeIgniter 4
+REST API
+MySQL Database
+File Upload System
+📁 Struktur Project
+ci-berita/
+│
+├── app/
+│   ├── Controllers/
+│   │   └── Api.php
+│   ├── Models/
+│   └── Config/
+│
+├── public/
+│   └── uploads/        # folder gambar
+│
+├── flutter_berita_app/
+│   ├── lib/
+│   │   ├── models/
+│   │   ├── providers/
+│   │   ├── services/
+│   │   └── screens/
+│
+└── database/
+    └── db_news.sql
+🚀 Cara Menjalankan Project
+1. Clone Repository
+git clone https://github.com/username/flutter-news-cms.git
+2. Backend (CodeIgniter 4)
+cd ci-berita
+composer install
+php spark serve
 
-### 1. Backend (CodeIgniter 4)
+Akses:
 
-1. **Import database**:
+http://localhost:8080
+3. Database
+Import file:
+db_news.sql
+Setting database di:
+app/Config/Database.php
+4. Flutter App
+cd flutter_berita_app
+flutter pub get
+flutter run
+🌐 Konfigurasi API
 
-   - Import file `db_news.sql` ke MySQL menggunakan phpMyAdmin atau tool MySQL lainnya.
+Pastikan base URL di Flutter sesuai backend:
 
-2. **Konfigurasi database**:
+final String baseUrl = 'http://localhost:8080/api';
+final String uploadBaseUrl = 'http://localhost:8080/uploads';
+📸 Screenshot (Opsional tapi disarankan)
 
-   - Salin file `.env` dari file `env` (jika belum ada):
-     ```
-     cp env .env
-     ```
-   - Edit file `.env` dan sesuaikan pengaturan database:
-     ```
-     database.default.hostname = localhost
-     database.default.database = db_news
-     database.default.username = root
-     database.default.password =
-     database.default.DBDriver = MySQLi
-     ```
+Tambahkan screenshot di sini:
 
-3. **Jalankan server CodeIgniter**:
+/assets/screenshots/home.png
+/assets/screenshots/detail.png
+/assets/screenshots/form.png
+⚠️ Catatan Penting
+Jika pakai emulator Android → gunakan 10.0.2.2
+Jika pakai HP → gunakan IP komputer (misal 192.168.x.x)
+Folder uploads harus writable (permission 777 jika Linux/Mac)
+🧠 Insight Project
 
-   ```
-   php spark serve
-   ```
+Project ini melatih:
 
-   Server akan berjalan di `http://localhost:8080` atau `http://localhost:8081` jika port 8080 sudah digunakan.
+Integrasi Flutter dengan REST API
+Manajemen state menggunakan Provider
+Upload file dari mobile/web ke server
+Struktur MVC di CodeIgniter 4
+Debugging error API & CORS
+📜 License
 
-4. **Verifikasi API**:
-   - Buka browser dan kunjungi `http://localhost:8080/api/berita` atau `http://localhost:8081/api/berita`.
-   - Pastikan data JSON muncul tanpa error.
+MIT License
 
-### 2. Frontend (Flutter)
+👨‍💻 Author
 
-1. **Masuk ke direktori flutter**:
-
-   ```
-   cd flutter_berita_app
-   ```
-
-2. **Dapatkan dependencies**:
-
-   ```
-   flutter pub get
-   ```
-
-3. **Sesuaikan URL API**:
-
-   - Buka file `lib/services/api_service.dart`.
-   - Pastikan URL baseUrl sesuai dengan port yang digunakan CI4:
-     ```dart
-     final String baseUrl = 'http://localhost:8081/api';
-     ```
-   - Jika menggunakan emulator Android, gunakan `10.0.2.2` alih-alih `localhost`:
-     ```dart
-     final String baseUrl = 'http://10.0.2.2:8081/api';
-     ```
-
-4. **Jalankan aplikasi Flutter**:
-   ```
-   flutter run
-   ```
-
-## Panduan Tambahan
-
-- Untuk panduan lebih detail tentang pengembangan Flutter, lihat file `flutter_berita_app/PANDUAN_LOKAL.md`.
-- Jika terjadi masalah CORS, lihat bagian "Mengatasi Masalah CORS" pada file panduan tersebut.
-
-## Fitur Aplikasi
-
-- Daftar berita
-- Detail berita
-- Gambar berita (jika tersedia)
-- Informasi tanggal publikasi
-
-## Endpoint API
-
-- `GET /api/berita`: Mendapatkan semua berita
-- `GET /api/berita/{id}`: Mendapatkan berita berdasarkan ID
-- `POST /api/berita`: Membuat berita baru
-- `PUT /api/berita/{id}`: Memperbarui berita
-- `DELETE /api/berita/{id}`: Menghapus berita
+Dibuat sebagai project pembelajaran Flutter + API Integration
