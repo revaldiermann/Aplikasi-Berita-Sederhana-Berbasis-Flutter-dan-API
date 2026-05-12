@@ -1,103 +1,73 @@
-📱 Flutter News CMS (API + Flutter + CodeIgniter 4)
-📌 Deskripsi Project
+# 📰 Aplikasi Berita Sederhana (Fullstack)
 
-Flutter News CMS adalah aplikasi manajemen berita sederhana berbasis Flutter (frontend mobile/web) yang terhubung dengan REST API menggunakan CodeIgniter 4 (backend).
+Aplikasi portal berita modern yang dibangun menggunakan **CodeIgniter 4** sebagai Backend (RESTful API) dan **Flutter** sebagai Frontend (Mobile App).
 
-Aplikasi ini memungkinkan pengguna untuk melakukan operasi CRUD (Create, Read, Update, Delete) berita serta upload gambar.
+---
 
-Project ini dibuat sebagai latihan integrasi Flutter + API + Database MySQL.
+## 📸 Tampilan Aplikasi
+<!-- Ganti link gambar di bawah dengan path gambar Anda atau URL setelah di-upload ke GitHub -->
 
-⚙️ Fitur Utama
-📄 Menampilkan daftar berita dari API
-🔍 Detail berita
-➕ Tambah berita baru
-✏️ Edit berita
-❌ Hapus berita
-🖼️ Upload gambar berita
-🌐 Integrasi REST API (CodeIgniter 4)
-📱 Support Flutter Android & Web
-🧱 Tech Stack
-Frontend
-Flutter
-Provider (State Management)
-HTTP Package
-Image Picker
-Backend
-CodeIgniter 4
-REST API
-MySQL Database
-File Upload System
-📁 Struktur Project
-ci-berita/
-│
-├── app/
-│   ├── Controllers/
-│   │   └── Api.php
-│   ├── Models/
-│   └── Config/
-│
-├── public/
-│   └── uploads/        # folder gambar
-│
-├── flutter_berita_app/
-│   ├── lib/
-│   │   ├── models/
-│   │   ├── providers/
-│   │   ├── services/
-│   │   └── screens/
-│
-└── database/
-    └── db_news.sql
-🚀 Cara Menjalankan Project
-1. Clone Repository
-git clone https://github.com/username/flutter-news-cms.git
-2. Backend (CodeIgniter 4)
-cd ci-berita
-composer install
-php spark serve
+| Beranda | Detail Berita |
+| :---: | :---: |
+| <img src="screenshot/home.png" width="250"> | <img src="screenshot/detail.png" width="250"> |
 
-Akses:
+---
 
-http://localhost:8080
-3. Database
-Import file:
-db_news.sql
-Setting database di:
-app/Config/Database.php
-4. Flutter App
-cd flutter_berita_app
-flutter pub get
-flutter run
-🌐 Konfigurasi API
+## 🚀 Fitur Utama
+- **Backend (API):**
+  - RESTful API Berita (CRUD).
+  - Integrasi Database MySQL.
+  - Image Upload Management.
+- **Frontend (Mobile):**
+  - Menampilkan daftar berita terbaru.
+  - Halaman detail berita dengan gambar.
+  - UI yang responsif menggunakan Flutter.
 
-Pastikan base URL di Flutter sesuai backend:
+---
 
-final String baseUrl = 'http://localhost:8080/api';
-final String uploadBaseUrl = 'http://localhost:8080/uploads';
-📸 Screenshot (Opsional tapi disarankan)
+## 🛠️ Teknologi yang Digunakan
+- **Backend:** [CodeIgniter 4.5+](https://codeigniter.com)
+- **Mobile:** [Flutter](https://flutter.dev)
+- **Database:** MySQL
+- **Language:** PHP 8.4, Dart
 
-Tambahkan screenshot di sini:
+---
 
-/assets/screenshots/home.png
-/assets/screenshots/detail.png
-/assets/screenshots/form.png
-⚠️ Catatan Penting
-Jika pakai emulator Android → gunakan 10.0.2.2
-Jika pakai HP → gunakan IP komputer (misal 192.168.x.x)
-Folder uploads harus writable (permission 777 jika Linux/Mac)
-🧠 Insight Project
+## ⚙️ Cara Instalasi
 
-Project ini melatih:
+### 1. Backend (CI4)
+1. Clone repositori ini.
+2. Masuk ke folder root proyek.
+3. Jalankan perintah untuk menginstal dependensi:
+   ```bash
+   composer update
+   ```
+4. Salin file `env` menjadi `.env` dan sesuaikan database Anda:
+   ```bash
+   cp env .env
+   ```
+5. Buat folder `writable` jika belum ada:
+   ```bash
+   mkdir -p writable/cache writable/debugbar writable/logs writable/session writable/uploads && chmod -R 777 writable
+   ```
+6. Jalankan server:
+   ```bash
+   php spark serve
+   ```
 
-Integrasi Flutter dengan REST API
-Manajemen state menggunakan Provider
-Upload file dari mobile/web ke server
-Struktur MVC di CodeIgniter 4
-Debugging error API & CORS
-📜 License
+### 2. Frontend (Flutter)
+1. Masuk ke folder `flutter_berita_app`.
+2. Jalankan perintah:
+   ```bash
+   flutter pub get
+   ```
+3. Sesuaikan `baseUrl` pada kode Flutter (biasanya di file service) ke IP laptop Anda (contoh: `http://192.168.1.5:8080`).
+4. Jalankan aplikasi:
+   ```bash
+   flutter run
+   ```
 
-MIT License
+---
 
-👨‍💻 Author
-
-Dibuat sebagai project pembelajaran Flutter + API Integration
+## 📝 Lisensi
+Proyek ini dilisensikan di bawah [MIT License](LICENSE).

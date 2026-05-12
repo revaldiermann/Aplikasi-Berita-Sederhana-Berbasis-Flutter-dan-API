@@ -28,7 +28,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/images/  # Pastikan ada garis miring di akhir jika merujuk folder
+
   # fonts:
   #   - family: Poppins
   #     fonts:
