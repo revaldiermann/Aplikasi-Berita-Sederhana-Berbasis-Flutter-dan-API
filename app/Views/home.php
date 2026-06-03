@@ -10,6 +10,34 @@
     <h3>Daftar Berita</h3>
     <a href="<?= base_url('berita/create') ?>"><button>Tambah</button></a>
     <br>
+    <form method="get" action="<?= base_url('/') ?>" style="margin-bottom:20px;">
+
+        <input
+            type="text"
+            name="keyword"
+            placeholder="Cari berita..."
+            value="<?= isset($keyword) ? $keyword : '' ?>"
+            style="
+            padding:10px;
+            width:300px;
+            border:1px solid #ccc;
+            border-radius:5px;
+        ">
+
+        <button
+            type="submit"
+            style="
+            padding:10px 15px;
+            background:#007bff;
+            color:white;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+        ">
+            Cari
+        </button>
+
+    </form>
     <?php
     foreach ($list as $dt) {
         echo $dt['id'] . ' - 

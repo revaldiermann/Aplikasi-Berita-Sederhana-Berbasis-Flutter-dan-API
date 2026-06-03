@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'notifikasi_screen.dart';
+
 import '../models/berita_model.dart';
 import '../providers/berita_provider.dart';
 import '../widgets/berita_card.dart';
+
 import 'berita_detail_screen.dart';
 import 'tambah_edit_berita_screen.dart';
 
@@ -10,439 +13,527 @@ class BeritaListScreen extends StatefulWidget {
   const BeritaListScreen({Key? key}) : super(key: key);
 
   @override
-  _BeritaListScreenState createState() => _BeritaListScreenState();
+  State<BeritaListScreen> createState() => _BeritaListScreenState();
 }
 
 class _BeritaListScreenState extends State<BeritaListScreen> {
-  late ScrollController _scrollController;
+  // ================================
+  // CONTROLLER
+  // ================================
+
+  final TextEditingController _searchController = TextEditingController();
+
+  final ScrollController _scrollController = ScrollController();
+
+  // ================================
+  // STATE
+  // ================================
+
   bool _isScrolled = false;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<BeritaProvider>(context, listen: false).fetchBerita(),
-    );
 
-    _scrollController = ScrollController();
-    _scrollController.addListener(_listenToScrollChange);
-  }
+    // Ambil data berita pertama kali
+    Future.microtask(() {
+      Provider.of<BeritaProvider>(
+        context,
+        listen: false,
+      ).fetchBerita();
+    });
 
-  void _listenToScrollChange() {
-    if (_scrollController.offset > 0 && !_isScrolled) {
-      setState(() {
-        _isScrolled = true;
-      });
-    } else if (_scrollController.offset <= 0 && _isScrolled) {
-      setState(() {
-        _isScrolled = false;
-      });
-    }
+    // Listener scroll
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 20) {
+        setState(() {
+          _isScrolled = true;
+        });
+      } else {
+        setState(() {
+          _isScrolled = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_listenToScrollChange);
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  // Konfirmasi hapus berita
-  Future<void> _konfirmasiHapus(BuildContext context, int id) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Hapus'),
-        content: const Text('Anda yakin ingin menghapus berita ini?'),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('BATAL'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('HAPUS'),
-          ),
-        ],
-      ),
+  // ================================
+  // SEARCH BERITA
+  // ================================
+
+  Future<void> _searchBerita(
+    String keyword,
+  ) async {
+    final provider = Provider.of<BeritaProvider>(
+      context,
+      listen: false,
     );
 
-    if (result == true) {
-      try {
-        await Provider.of<BeritaProvider>(context, listen: false)
-            .deleteBerita(id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Berita berhasil dihapus'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menghapus berita: ${e.toString()}'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    if (keyword.trim().isEmpty) {
+      provider.fetchBerita();
+    } else {
+      provider.searchBerita(keyword);
     }
   }
 
-  // Navigasi ke layar tambah berita
-  Future<void> _navigateToTambahBerita(BuildContext context) async {
+  // ================================
+  // NAVIGASI TAMBAH BERITA
+  // ================================
+
+  Future<void> _tambahBerita() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const TambahEditBeritaScreen(),
+        builder: (_) => const TambahEditBeritaScreen(),
       ),
     );
 
+    // Refresh setelah tambah berita
     if (result == true) {
-      // Refresh daftar berita jika berhasil ditambahkan
-      Provider.of<BeritaProvider>(context, listen: false).fetchBerita();
+      Provider.of<BeritaProvider>(
+        context,
+        listen: false,
+      ).fetchBerita();
     }
   }
 
-  // Navigasi ke layar edit berita
-  Future<void> _navigateToEditBerita(
-      BuildContext context, Berita berita) async {
+  // ================================
+  // NAVIGASI EDIT BERITA
+  // ================================
+
+  Future<void> _editBerita(
+    Berita berita,
+  ) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TambahEditBeritaScreen(
+        builder: (_) => TambahEditBeritaScreen(
           berita: berita,
           isEditing: true,
         ),
       ),
     );
 
+    // Refresh setelah edit berita
     if (result == true) {
-      // Refresh daftar berita jika berhasil diupdate
-      Provider.of<BeritaProvider>(context, listen: false).fetchBerita();
+      Provider.of<BeritaProvider>(
+        context,
+        listen: false,
+      ).fetchBerita();
     }
+  }
+
+  // ================================
+  // HAPUS BERITA
+  // ================================
+
+  Future<void> _hapusBerita(
+    int id,
+  ) async {
+    await Provider.of<BeritaProvider>(
+      context,
+      listen: false,
+    ).deleteBerita(id);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Berita berhasil dihapus"),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Provider digunakan untuk mengambil
+    // state/data berita dari API
+    final provider = Provider.of<BeritaProvider>(context);
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: NestedScrollView(
-          controller: _scrollController,
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                expandedHeight: 150,
-                floating: false,
-                pinned: true,
-                elevation: _isScrolled ? 4 : 0,
-                backgroundColor:
-                    _isScrolled ? Colors.white : Colors.transparent,
-                foregroundColor:
-                    _isScrolled ? Colors.blue.shade700 : Colors.white,
-                stretch: true,
-                title: _isScrolled
-                    ? const Text(
-                        'Portal Berita',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : null,
-                flexibleSpace: FlexibleSpaceBar(
-                  titlePadding:
-                      const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                  title: !_isScrolled
-                      ? const Text(
-                          'Portal Berita',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black26,
-                                blurRadius: 2,
-                                offset: Offset(1, 1),
-                              ),
-                            ],
-                          ),
-                        )
-                      : null,
-                  centerTitle: false,
-                  background: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFF1565C0),
-                          Color(0xFF1976D2),
-                          Color(0xFF2196F3),
-                        ],
-                      ),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.only(left: 20, bottom: 70),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Berita Terkini',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
+      // =================================
+      // WARNA DASAR BACKGROUND
+      // =================================
+
+      backgroundColor: const Color(0xffF5F7FA),
+
+      // =================================
+      // APP BAR MODERN
+      // =================================
+
+      appBar: AppBar(
+        elevation: _isScrolled ? 2 : 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        title: Row(
+          children: [
+            // Logo/icon aplikasi
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.newspaper,
+                color: Colors.blue.shade700,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Judul aplikasi
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "News Portal",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: () {
-                      Provider.of<BeritaProvider>(context, listen: false)
-                          .fetchBerita();
-                    },
-                    tooltip: 'Refresh',
+                Text(
+                  "Berita terkini hari ini",
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
                   ),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+
+        actions: [
+          // NOTIFIKASI
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                tooltip: "Notifikasi",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotifikasiScreen(),
+                    ),
+                  );
+                },
+              ),
+
+              // Badge jumlah notifikasi
+              Positioned(
+                right: 10,
+                top: 10,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // REFRESH
+          IconButton(
+            onPressed: () {
+              provider.fetchBerita();
+            },
+            icon: const Icon(Icons.refresh),
+          ),
+
+          const SizedBox(width: 8),
+        ],
+
+
+      ),
+
+      // =================================
+      // BODY
+      // =================================
+
+      body: Column(
+        children: [
+          // =================================
+          // HEADER + SEARCH
+          // =================================
+
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.shade700,
+                  Colors.blue.shade400,
                 ],
               ),
-            ];
-          },
-          body: Consumer<BeritaProvider>(
-            builder: (context, provider, child) {
-              if (provider.isLoading) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Memuat berita...',
-                        style: TextStyle(color: Colors.grey[600]),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // HEADLINE
+                const Text(
+                  "Breaking News 🔥",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                const Text(
+                  "Temukan berita terbaru dan informasi menarik setiap hari.",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
+                // =================================
+                // SEARCH BAR MODERN
+                // =================================
+
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(
+                      16,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                );
-              }
-
-              if (provider.error != null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline,
-                          size: 50, color: Colors.red[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Terjadi kesalahan:',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _searchBerita,
+                    decoration: InputDecoration(
+                      hintText: "Cari berita...",
+                      border: InputBorder.none,
+                      prefixIcon: const Icon(
+                        Icons.search,
                       ),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                _searchController.clear();
+
+                                provider.fetchBerita();
+
+                                setState(() {});
+                              },
+                              icon: const Icon(
+                                Icons.close,
+                              ),
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // =================================
+          // TITLE SECTION
+          // =================================
+
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 10,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Berita Terbaru",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "${provider.beritaList.length} Artikel",
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // =================================
+          // LIST BERITA
+          // =================================
+
+          Expanded(
+            child: provider.isLoading
+
+                // =============================
+                // LOADING
+                // =============================
+
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+
+                // =============================
+                // ERROR
+                // =============================
+
+                : provider.error != null
+                    ? Center(
                         child: Text(
                           provider.error!,
-                          style: TextStyle(color: Colors.red[700]),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => provider.fetchBerita(),
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Coba Lagi'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
+                          style: const TextStyle(
+                            color: Colors.red,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                      )
 
-              if (provider.beritaList.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.article_outlined,
-                        size: 70,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada berita',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Mulai tambahkan berita baru sekarang',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.3),
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(12),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Colors.blue, Colors.blueAccent],
-                          ),
-                        ),
-                        child: ElevatedButton.icon(
-                          onPressed: () => _navigateToTambahBerita(context),
-                          icon: const Icon(
-                            Icons.add_circle_outline,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                          label: const Text(
-                            'Tambah Berita Baru',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 30,
-                              vertical: 15,
-                            ),
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                    // =============================
+                    // EMPTY DATA
+                    // =============================
 
-              return RefreshIndicator(
-                onRefresh: () => provider.fetchBerita(),
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(top: 12, bottom: 80),
-                  itemCount: provider.beritaList.length,
-                  itemBuilder: (context, index) {
-                    final berita = provider.beritaList[index];
-                    return Dismissible(
-                      key: Key('berita-${berita.id}'),
-                      background: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 24),
-                        child: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                      direction: DismissDirection.endToStart,
-                      confirmDismiss: (_) async {
-                        await _konfirmasiHapus(context, berita.id);
-                        return false; // Selalu kembalikan false agar item tidak dihapus dari ListView
-                      },
-                      child: BeritaCard(
-                        berita: berita,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  BeritaDetailScreen(id: berita.id),
+                    : provider.beritaList.isEmpty
+                        ? const Center(
+                            child: Text(
+                              "Berita tidak ditemukan",
                             ),
-                          );
-                        },
-                        onEdit: () => _navigateToEditBerita(context, berita),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
+                          )
+
+                        // =============================
+                        // LISTVIEW BERITA
+                        // =============================
+
+                        : RefreshIndicator(
+                            onRefresh: () async {
+                              provider.fetchBerita();
+                            },
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.only(
+                                left: 16,
+                                right: 16,
+                                bottom: 100,
+                              ),
+                              itemCount: provider.beritaList.length,
+                              itemBuilder: (context, index) {
+                                // Ambil data berita
+                                final berita = provider.beritaList[index];
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: 16,
+                                  ),
+                                  child: BeritaCard(
+                                    // Data berita
+                                    berita: berita,
+
+                                    // Klik detail
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => BeritaDetailScreen(
+                                            id: berita.id,
+                                          ),
+                                        ),
+                                      );
+                                    },
+
+                                    // Klik edit
+                                    onEdit: () {
+                                      _editBerita(berita);
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+          ),
+        ],
+      ),
+
+      // =================================
+      // FLOATING BUTTON
+      // =================================
+
+      floatingActionButton: FloatingActionButton.extended(
+        // Tombol tambah berita
+        onPressed: _tambahBerita,
+
+        backgroundColor: Colors.blue.shade700,
+
+        icon: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+
+        label: const Text(
+          "Tambah",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 16, right: 10),
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
-              spreadRadius: 3,
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(30),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.blue, Colors.blueAccent],
+
+      // =================================
+      // BOTTOM NAVIGATION BAR
+      // =================================
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        selectedItemColor: Colors.blue.shade700,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          // Menu Home
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Home",
           ),
-        ),
-        child: FloatingActionButton.extended(
-          onPressed: () => _navigateToTambahBerita(context),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          icon: const Icon(
-            Icons.add_circle_outline,
-            color: Colors.white,
+
+          // Menu Trending
+          BottomNavigationBarItem(
+            icon: Icon(Icons.trending_up),
+            label: "Trending",
           ),
-          label: const Text(
-            'Berita Baru',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: Colors.white,
-            ),
+
+          // Menu Profile
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profile",
           ),
-        ),
+        ],
       ),
     );
   }

@@ -1,7 +1,7 @@
 <?php
-
+// app/Controllers/Berita.php
 namespace App\Controllers;
-
+// ---------------------------Import library
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\BeritaModel;
@@ -9,27 +9,45 @@ use CodeIgniter\Exceptions\PageNotFoundException;
 
 class Berita extends BaseController
 {
+    //---------------------------Menampilkan semua berita
     public function index()
     {
-        $berita = new BeritaModel();
-        $getdata = $berita->findAll();
-        $data['list'] = $getdata;
+        $beritaModel = new BeritaModel();
+
+        // Ambil keyword dari URL
+        $keyword = $this->request->getGet('keyword');
+
+        // Jika ada keyword pencarian
+        if ($keyword) {
+
+            $getdata = $beritaModel
+                ->like('judul', $keyword)
+                ->orLike('isi', $keyword)
+                ->findAll();
+        } else {
+
+            // Jika tidak ada keyword
+            $getdata = $beritaModel->findAll();
+        }
+
+        // Kirim data ke view
+        $data = [
+            'list' => $getdata,
+            'keyword' => $keyword
+        ];
 
         return view('home', $data);
     }
-
+    // ---------------------------Menampilkan detail berita
     public function preview($id)
     {
         //Mengambil data dahulu
         $berita = new BeritaModel();
         $data['news'] = $berita->where(['id' => $id])->first();
-
         //cek apakah data kosong
-
         if (!$data['news']) {
             throw PageNotFoundException::forPageNotFound();
         }
-
         return view('detail_berita', $data);
     }
     public function create()
@@ -49,16 +67,15 @@ class Berita extends BaseController
         }
         return view('create_berita');
     }
+    // -------------------------------------------Edit berita
     public function edit($id)
     {
         //ambil data diedit
         $berita = new BeritaModel();
         $data['news'] = $berita->where('id', $id)->first();
-
         $validation = \Config\Services::validation();
         $validation->setRules(['judul' => 'required']);
         $isDataValid = $validation->withRequest($this->request)->run();
-
         if ($isDataValid) {
             $berita = new BeritaModel();
             $berita->update($id, [
@@ -70,6 +87,7 @@ class Berita extends BaseController
         }
         return view('edit_berita', $data);
     }
+    // -------------------------------------------Hapus berita
     public function delete($id)
     {
         $berita = new BeritaModel();

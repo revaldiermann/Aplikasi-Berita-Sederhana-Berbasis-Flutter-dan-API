@@ -25,14 +25,45 @@ class Api extends ResourceController
     //     header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE');
     // }
 
+    // public function getBerita()
+    // {
+    //     $model = new BeritaModel();
+    //     $data = $model->findAll();
+
+    //     return $this->respond($data);
+    // }
+
     public function getBerita()
     {
-        $model = new BeritaModel();
-        $data = $model->findAll();
+        try {
 
-        return $this->respond($data);
+            // Ambil keyword dari query parameter
+            $keyword = $this->request->getGet('keyword');
+
+            // Instance model
+            $beritaModel = new \App\Models\BeritaModel();
+
+            // Jika ada keyword → lakukan pencarian
+            if ($keyword) {
+
+                $berita = $beritaModel
+                    ->like('judul', $keyword)
+                    ->orLike('isi', $keyword)
+                    ->findAll();
+            } else {
+
+                // Jika tidak ada keyword → tampilkan semua berita
+                $berita = $beritaModel->findAll();
+            }
+
+            return $this->respond($berita);
+        } catch (\Exception $e) {
+
+            return $this->fail(
+                'Gagal mengambil berita: ' . $e->getMessage()
+            );
+        }
     }
-
     public function getBeritaById($id = null)
     {
         $model = new BeritaModel();

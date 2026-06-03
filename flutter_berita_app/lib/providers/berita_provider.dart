@@ -140,4 +140,18 @@ class BeritaProvider with ChangeNotifier {
       throw Exception('Gagal upload gambar: $e');
     }
   }
+
+  Future<void> searchBerita(String keyword) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _beritaList = await _apiService.searchBerita(keyword);
+    } catch (e) {
+      _error = e.toString();
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
 }

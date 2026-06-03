@@ -9,7 +9,7 @@ Aplikasi portal berita modern yang dibangun menggunakan **CodeIgniter 4** sebaga
 
 | Beranda | Detail Berita |
 | :---: | :---: |
-| <img src="screenshot/home.png" width="250"> | <img src="screenshot/detail.png" width="250"> |
+| <img src="screenshot/1.png" width="250"> | <img src="screenshot/2.png" width="250"> |  <img src="screenshot/3.png" width="250">
 
 ---
 
