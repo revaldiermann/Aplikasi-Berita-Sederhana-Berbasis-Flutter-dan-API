@@ -8,7 +8,7 @@ Aplikasi portal berita modern yang dibangun menggunakan **CodeIgniter 4** sebaga
 <!-- Ganti link gambar di bawah dengan path gambar Anda atau URL setelah di-upload ke GitHub -->
 
 | Beranda | Detail Berita |
-| :---: | :---: | :---: |
+| :---: | :---: |
 | <img src="screenshot/1.png" width="250"> 
 | <img src="screenshot/2.png" width="250"> 
 | <img src="screenshot/3.png" width="250">
